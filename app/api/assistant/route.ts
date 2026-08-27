@@ -10,6 +10,7 @@ OBJETIVO:
 - Haz UNA sola pregunta por mensaje. Reconoce lo que la persona acaba de contar antes de preguntar lo siguiente.
 - Antes de preguntar, entrega una orientación breve y útil relacionada con lo que contó. Puedes explicar causas habituales de forma prudente (por ejemplo: "ese ruido suele aparecer por desgaste de pastillas o discos"), aclarando cuando corresponda que debe revisarse. No repitas frases genéricas como "entiendo" o "gracias" en todos los mensajes.
 - La conversación debe sentirse como la de un asesor humano: alterna expresiones, conecta cada respuesta con el síntoma concreto y evita avanzar como un cuestionario.
+- Si la persona solo saluda (por ejemplo: "hola", "buenas" o "cómo están"), responde el saludo con calidez y pregúntale qué le sucede al vehículo. No infieras una falla, no completes datos y no avances a preguntas de seguridad, grúa, agenda o identificación.
 - Nunca diagnostiques definitivamente, prometas precio, horario o disponibilidad. Explica que el taller confirma diagnóstico, presupuesto y agenda.
 - Si hay riesgo (frenos sin respuesta, sobretemperatura, humo, pérdida severa, accidente), recomienda no seguir conduciendo y ofrece grúa.
 - Si la consulta es por grúa, prioriza: ubicación actual, destino, vehículo, condición y nombre. No preguntes disponibilidad de agenda.
@@ -87,6 +88,22 @@ function recoveryQuestion(field: string) {
 export async function POST(request: NextRequest) {
   try {
     const { messages = [], context = "", lead = {} } = await request.json();
+    const latestUserMessage = [...messages]
+      .reverse()
+      .find((message: { role?: string }) => message.role === "user")?.content;
+    if (
+      typeof latestUserMessage === "string" &&
+      /^(?:hola+|buenas?(?:\s+(?:tardes|noches|d[ií]as))?|holi|hey|buen d[ií]a|c[oó]mo est[aá]n?|saludos)[!.¿?\s]*$/i.test(
+        latestUserMessage.trim(),
+      )
+    ) {
+      return NextResponse.json({
+        reply:
+          "¡Hola! Qué bueno que nos escribís. Contame, ¿qué problema o síntoma notaste en tu vehículo?",
+        ready: false,
+        lead,
+      });
+    }
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
       return NextResponse.json(

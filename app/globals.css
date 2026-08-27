@@ -1482,8 +1482,14 @@ footer {
 }
 .chat-message.typing {
   display: flex;
+  align-items: center;
   gap: 5px;
   padding: 15px 18px;
+}
+.chat-message.typing small {
+  margin-right: 5px;
+  color: #747779;
+  font-size: 10px;
 }
 .chat-message.typing span {
   width: 6px;
@@ -1515,9 +1521,35 @@ footer {
   background: #168b4c;
   color: #fff;
   text-align: left;
-  animation: assistantIn 0.25s ease-out;
+  animation: whatsappReady 1.8s ease-in-out infinite;
   flex: none;
   box-shadow: 0 12px 30px rgba(22, 139, 76, 0.24);
+}
+@keyframes whatsappReady {
+  0%, 100% { transform: scale(1); box-shadow: 0 12px 30px rgba(22, 139, 76, 0.24); }
+  50% { transform: scale(1.015); box-shadow: 0 16px 38px rgba(22, 139, 76, 0.42); }
+}
+.assistant-quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-self: flex-start;
+  animation: assistantIn .24s ease-out;
+}
+.assistant-quick-replies button {
+  border: 1px solid #cfd0cc;
+  border-radius: 999px;
+  background: #fff;
+  color: #202224;
+  padding: 9px 12px;
+  font-size: 11px;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+.assistant-quick-replies button:hover,
+.assistant-quick-replies button:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--red);
+  background: #fff7f7;
 }
 .assistant-whatsapp span {
   display: flex;

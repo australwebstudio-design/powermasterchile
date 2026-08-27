@@ -400,6 +400,33 @@ function VirtualAssistant({
     [messages, loading],
   );
 
+  const isGreetingOnly = (value: string) =>
+    /^(?:hola+|buenas?(?:\s+(?:tardes|noches|d[ií]as))?|holi|hey|buen d[ií]a|c[oó]mo est[aá]n?|saludos)[!.¿?\s]*$/i.test(
+      value.trim(),
+    );
+
+  const vibrate = () => {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(12);
+    }
+  };
+
+  const lastAssistantMessage =
+    [...messages].reverse().find((message) => message.role === "assistant")
+      ?.content || "";
+  const quickReplies = (() => {
+    if (loading || ready) return [];
+    if (/qu[eé] problema|qu[eé] est[aá] pasando|s[ií]ntoma/i.test(lastAssistantMessage))
+      return ["Hace un ruido", "No arranca", "Se encendió un testigo"];
+    if (/puede circular|qued[oó] inmovilizado|evaluemos una gr[uú]a/i.test(lastAssistantMessage))
+      return ["Puede circular", "Está inmovilizado", "Necesito grúa"];
+    if (/desde cu[aá]ndo/i.test(lastAssistantMessage))
+      return ["Desde hoy", "Hace unos días", "Hace varias semanas"];
+    if (/d[ií]a y horario|para cu[aá]ndo|qu[eé] horario/i.test(lastAssistantMessage))
+      return ["Hoy", "Mañana en la mañana", "Mañana en la tarde"];
+    return [];
+  })();
+
   const fallbackReply = (count: number, value: string) => {
     const lower = value.toLowerCase();
     if (count === 1) {
@@ -422,16 +449,27 @@ function VirtualAssistant({
     return "Perfecto, ya tengo toda la información. Ahora voy a derivarte con un experto de Power Master para que coordine tu atención por WhatsApp.";
   };
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    const value = input.trim();
+  async function sendMessage(value: string) {
+    value = value.trim();
     if (!value || loading) return;
+    vibrate();
     const nextMessages: ChatMessage[] = [
       ...messages,
       { role: "user", content: value },
     ];
     setMessages(nextMessages);
     setInput("");
+    if (isGreetingOnly(value)) {
+      setMessages([
+        ...nextMessages,
+        {
+          role: "assistant",
+          content:
+            "¡Hola! Qué bueno que nos escribís. Contame, ¿qué problema o síntoma notaste en tu vehículo?",
+        },
+      ]);
+      return;
+    }
     setLoading(true);
     try {
       const response = await fetch("/api/assistant", {
@@ -462,7 +500,8 @@ function VirtualAssistant({
       ]);
     } catch {
       const userCount = nextMessages.filter(
-        (message) => message.role === "user",
+        (message) =>
+          message.role === "user" && !isGreetingOnly(message.content),
       ).length;
       const shouldBeReady = userCount >= 6;
       setReady(shouldBeReady);
@@ -475,7 +514,13 @@ function VirtualAssistant({
     }
   }
 
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    void sendMessage(input);
+  }
+
   const sendWhatsApp = () => {
+    vibrate();
     const transcript = messages
       .filter((message) => message.role === "user")
       .map((message) => `• ${message.content}`)
@@ -506,6 +551,7 @@ function VirtualAssistant({
   };
 
   const reset = () => {
+    vibrate();
     setMessages([{ role: "assistant", content: greeting }]);
     setLead(
       initialContext !== "Consulta general" ? { service: initialContext } : {},
@@ -547,9 +593,19 @@ function VirtualAssistant({
         ))}
         {loading && (
           <div className="chat-message assistant typing">
+            <small>Analizando tu consulta</small>
             <span />
             <span />
             <span />
+          </div>
+        )}
+        {quickReplies.length > 0 && (
+          <div className="assistant-quick-replies" aria-label="Respuestas sugeridas">
+            {quickReplies.map((reply) => (
+              <button key={reply} onClick={() => void sendMessage(reply)}>
+                {reply}
+              </button>
+            ))}
           </div>
         )}
         {ready && (
@@ -1009,20 +1065,28 @@ export default function Home() {
         <div className="cta-lines" />
         <div>
           <span className="kicker">POWER MASTER CHILE</span>
-          <h2>¿Tu vehículo necesita atención?</h2>
+          <h2>
+            Tu vehículo merece un diagnóstico correcto.
+            <br />
+            <em>No cambios por prueba y error.</em>
+          </h2>
           <p>
-            Cuéntanos qué está pasando. Organizamos tu consulta y te orientamos
-            directamente por WhatsApp.
+            Cuéntanos qué está pasando y nuestro asistente organizará la
+            consulta para que el equipo pueda ayudarte sin hacerte repetir toda
+            la información.
           </p>
           <div>
             <button onClick={() => open("Consulta para agendar")}>
-              Preparar mi consulta <Zap />
+              Hablar con el asistente <Zap />
             </button>
+            <a className="cta-secondary" href={`tel:${TOW_PHONE}`}>
+              <Phone /> Llamar al taller
+            </a>
             <button
               className="cta-secondary"
-              onClick={() => open("Quiero hablar con el taller")}
+              onClick={() => open("Necesito una grúa")}
             >
-              <MessageCircle /> Hablar con el asistente
+              <Truck /> Solicitar grúa
             </button>
           </div>
         </div>
