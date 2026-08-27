@@ -371,6 +371,7 @@ type Lead = {
   urgency?: string;
   availability?: string;
   location?: string;
+  destination?: string;
 };
 
 function VirtualAssistant({
@@ -399,14 +400,26 @@ function VirtualAssistant({
     [messages, loading],
   );
 
-  const fallbackReply = (count: number) => {
-    if (count < 2)
-      return "Perfecto, entiendo. ¿Qué marca, modelo y año es el vehículo?";
-    if (count < 4)
-      return "Gracias. ¿El vehículo puede circular con seguridad o preferís que evaluemos una grúa?";
-    if (count < 6)
-      return "Bien, ya tengo una idea más clara. ¿Para cuándo te gustaría coordinar la revisión?";
-    return "Perfecto, con esto ya podemos dejarle la consulta al equipo para que confirme el turno por WhatsApp.";
+  const fallbackReply = (count: number, value: string) => {
+    const lower = value.toLowerCase();
+    if (count === 1) {
+      if (/fren|chill|ruido|raspa/.test(lower))
+        return "Ese ruido o pérdida de frenado suele relacionarse con desgaste de pastillas, discos o una falla hidráulica. Por seguridad conviene revisarlo cuanto antes. ¿Qué marca, modelo y año es el vehículo?";
+      if (/calent|temperatura|refrigerante|humo/.test(lower))
+        return "Una subida de temperatura puede aparecer por falta de refrigerante, una fuga o una falla en la circulación. Evitá seguir usándolo si vuelve a calentarse. ¿Qué marca, modelo y año es el vehículo?";
+      if (/bater|arranca|parte|eléctric|electr/.test(lower))
+        return "Cuando cuesta arrancar, la causa puede estar en la batería, el sistema de carga o el motor de partida; hay que medirlo para no cambiar piezas innecesariamente. ¿Qué marca, modelo y año es el vehículo?";
+      return "Hay varias causas posibles y conviene revisarlo antes de reemplazar piezas. ¿Qué marca, modelo y año es el vehículo?";
+    }
+    if (count === 2)
+      return "Perfecto, con ese dato ya podemos orientar mejor la revisión. ¿El vehículo puede circular con seguridad o quedó inmovilizado?";
+    if (count === 3)
+      return "Bien. ¿Desde cuándo ocurre y notaste algún testigo encendido, ruido o cambio adicional?";
+    if (count === 4)
+      return "Ya tenemos un panorama bastante claro. ¿Para qué día y horario te gustaría solicitar la revisión?";
+    if (count === 5)
+      return "Perfecto, el horario quedará sujeto a confirmación del taller. ¿A nombre de quién dejamos la consulta?";
+    return "Perfecto, ya tengo toda la información. Ahora voy a derivarte con un experto de Power Master para que coordine tu atención por WhatsApp.";
   };
 
   async function submit(event: FormEvent) {
@@ -432,8 +445,11 @@ function VirtualAssistant({
       });
       if (!response.ok) throw new Error("assistant unavailable");
       const data = await response.json();
-      const isReady = Boolean(data.ready);
-      setLead(data.lead || lead);
+      const reply = String(data.reply || "");
+      const isReady =
+        Boolean(data.ready) ||
+        /ya tengo toda la informaci[oó]n|voy a derivarte con un experto/i.test(reply);
+      setLead((currentLead) => ({ ...currentLead, ...(data.lead || {}) }));
       setReady(isReady);
       setMessages((current) => [
         ...current,
@@ -441,16 +457,18 @@ function VirtualAssistant({
           role: "assistant",
           content: isReady
             ? "Perfecto, ya tengo toda la información. Ahora voy a derivarte con un experto de Power Master para que coordine tu atención por WhatsApp."
-            : data.reply,
+            : reply,
         },
       ]);
     } catch {
-      const shouldBeReady =
-        nextMessages.filter((message) => message.role === "user").length >= 4;
+      const userCount = nextMessages.filter(
+        (message) => message.role === "user",
+      ).length;
+      const shouldBeReady = userCount >= 6;
       setReady(shouldBeReady);
       setMessages((current) => [
         ...current,
-        { role: "assistant", content: fallbackReply(current.length) },
+        { role: "assistant", content: fallbackReply(userCount, value) },
       ]);
     } finally {
       setLoading(false);
@@ -473,6 +491,7 @@ function VirtualAssistant({
       lead.urgency && `Urgencia: ${lead.urgency}`,
       lead.availability && `Disponibilidad: ${lead.availability}`,
       lead.location && `Ubicación: ${lead.location}`,
+      lead.destination && `Destino del traslado: ${lead.destination}`,
       "",
       "Información adicional:",
       transcript,
@@ -533,17 +552,17 @@ function VirtualAssistant({
             <span />
           </div>
         )}
+        {ready && (
+          <button className="assistant-whatsapp" onClick={sendWhatsApp}>
+            <span>
+              <b>Continuar ahora por WhatsApp</b>
+              <small>Enviar todos los datos al taller</small>
+            </span>
+            <MessageCircle />
+          </button>
+        )}
         <div ref={endRef} />
       </div>
-      {ready && (
-        <button className="assistant-whatsapp" onClick={sendWhatsApp}>
-          <span>
-            <b>Continuar con un experto</b>
-            <small>Abrir WhatsApp con todos los datos</small>
-          </span>
-          <MessageCircle />
-        </button>
-      )}
       {!ready && (
         <form className="assistant-input" onSubmit={submit}>
           <input
