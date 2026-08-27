@@ -659,16 +659,15 @@ export default function Home() {
           loop
           playsInline
           preload="auto"
-          poster="/power-master-hero.webp"
           aria-hidden="true"
           disablePictureInPicture
         >
           <source
-            src="https://res.cloudinary.com/dvvuwigmy/video/upload/f_mp4,q_auto:good,vc_h264/v1787811302/InDown_uqk6ex.mp4"
+            src="https://res.cloudinary.com/dvvuwigmy/video/upload/f_mp4,q_auto:good,vc_h264/v1787811551/copy_F49A7FF6-8EA8-4252-ACCE-724D9FC57779_uzio8y.mp4"
             type="video/mp4"
           />
           <source
-            src="https://res.cloudinary.com/dvvuwigmy/video/upload/v1787811302/InDown_uqk6ex.mov"
+            src="https://res.cloudinary.com/dvvuwigmy/video/upload/v1787811551/copy_F49A7FF6-8EA8-4252-ACCE-724D9FC57779_uzio8y.mov"
             type="video/quicktime"
           />
         </video>
@@ -825,7 +824,6 @@ export default function Home() {
             loading="lazy"
           />
           <div className="tow-road" />
-          <Truck />
           <span className="tow-badge">
             <b>ASISTENCIA</b>
             <small>TRASLADO SEGURO</small>
@@ -1081,9 +1079,6 @@ export default function Home() {
               Asistente virtual
             </button>
           </div>
-          <button onClick={() => open("Consulta para agendar")}>
-            Diagnóstico Express <ArrowRight />
-          </button>
         </div>
         <div className="footer-bottom">
           <span>© 2026 Power Master Chile</span>
