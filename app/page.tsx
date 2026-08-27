@@ -10,6 +10,7 @@ import {
   CircleGauge,
   Clock3,
   MapPin,
+  Mail,
   Menu,
   MessageCircle,
   Navigation,
@@ -19,13 +20,17 @@ import {
   ShieldCheck,
   Snowflake,
   Sparkles,
+  Star,
   Truck,
   Wrench,
   X,
   Zap,
 } from "lucide-react";
-const WA = "https://wa.me/message/PRWF2543EI5ID1";
-const TOW_PHONE = process.env.NEXT_PUBLIC_TOW_PHONE || "";
+const WA_NUMBER = "56977997536";
+const WA = `https://wa.me/${WA_NUMBER}`;
+const EMAIL = "pmtemuco@gmail.com";
+const MAPS_URL = "https://maps.app.goo.gl/BLeuZg8a1hnGCoYD6";
+const TOW_PHONE = process.env.NEXT_PUBLIC_TOW_PHONE || "+56977997536";
 const services = [
   {
     icon: Activity,
@@ -427,11 +432,17 @@ function VirtualAssistant({
       });
       if (!response.ok) throw new Error("assistant unavailable");
       const data = await response.json();
+      const isReady = Boolean(data.ready);
       setLead(data.lead || lead);
-      setReady(Boolean(data.ready));
+      setReady(isReady);
       setMessages((current) => [
         ...current,
-        { role: "assistant", content: data.reply },
+        {
+          role: "assistant",
+          content: isReady
+            ? "Perfecto, ya tengo toda la información. Ahora voy a derivarte con un experto de Power Master para que coordine tu atención por WhatsApp."
+            : data.reply,
+        },
       ]);
     } catch {
       const shouldBeReady =
@@ -527,23 +538,25 @@ function VirtualAssistant({
       {ready && (
         <button className="assistant-whatsapp" onClick={sendWhatsApp}>
           <span>
-            <b>Ya tenemos lo necesario</b>
-            <small>Enviar consulta y coordinar por WhatsApp</small>
+            <b>Continuar con un experto</b>
+            <small>Abrir WhatsApp con todos los datos</small>
           </span>
           <MessageCircle />
         </button>
       )}
-      <form className="assistant-input" onSubmit={submit}>
-        <input
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          placeholder="Escribí tu mensaje..."
-          autoFocus
-        />
-        <button disabled={!input.trim() || loading} aria-label="Enviar mensaje">
-          <Send />
-        </button>
-      </form>
+      {!ready && (
+        <form className="assistant-input" onSubmit={submit}>
+          <input
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder="Escribí tu mensaje..."
+            autoFocus
+          />
+          <button disabled={!input.trim() || loading} aria-label="Enviar mensaje">
+            <Send />
+          </button>
+        </form>
+      )}
       <small className="assistant-legal">
         La evaluación definitiva y el horario se confirman con el taller.
       </small>
@@ -560,6 +573,49 @@ export default function Home() {
   useEffect(() => {
     const timer = window.setTimeout(() => setAssistantNudge(true), 45000);
     return () => window.clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduceMotion) return;
+
+    const elements = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        ".section-head, .service-grid article, .services-note, .tow-art, .tow-copy, .trust-visual, .trust-copy, .prepurchase > div, .prepurchase aside, .cta > div:last-child, .contact-copy, .contact-map, .footer-main > *",
+      ),
+    );
+    document.documentElement.classList.add("reveal-enabled");
+    elements.forEach((element, index) => {
+      element.classList.add("reveal-item");
+      if (
+        element.matches(
+          ".service-grid article, .trust-visual, .prepurchase aside, .contact-map",
+        )
+      ) {
+        element.classList.add("reveal-scale");
+      } else {
+        element.classList.add(index % 2 === 0 ? "reveal-left" : "reveal-right");
+      }
+      element.style.setProperty("--reveal-delay", `${(index % 4) * 70}ms`);
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -7% 0px" },
+    );
+    elements.forEach((element) => observer.observe(element));
+
+    return () => {
+      observer.disconnect();
+      document.documentElement.classList.remove("reveal-enabled");
+    };
   }, []);
   const open = (context = "Consulta general") => {
     setAssistantNudge(false);
@@ -596,11 +652,26 @@ export default function Home() {
         </button>
       </header>
       <section className="hero" id="inicio">
-        <img
+        <video
           className="hero-image"
-          src="/power-master-hero.webp"
-          alt="Servicio técnico automotriz de alto estándar"
-        />
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/power-master-hero.webp"
+          aria-hidden="true"
+          disablePictureInPicture
+        >
+          <source
+            src="https://res.cloudinary.com/dvvuwigmy/video/upload/f_mp4,q_auto:good,vc_h264/v1787811302/InDown_uqk6ex.mp4"
+            type="video/mp4"
+          />
+          <source
+            src="https://res.cloudinary.com/dvvuwigmy/video/upload/v1787811302/InDown_uqk6ex.mov"
+            type="video/quicktime"
+          />
+        </video>
         <div className="hero-grid" />
         <div className="hero-shade" />
         <div className="hero-content">
@@ -639,6 +710,24 @@ export default function Home() {
                 <small>Orientación directa</small>
               </span>
             </div>
+            <a
+              className="google-rating"
+              href={MAPS_URL}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Ver el perfil de Power Master Chile en Google Maps"
+            >
+              <span className="google-mark">G</span>
+              <span>
+                <b>Opiniones en Google</b>
+                <small className="google-stars" aria-label="Cinco estrellas">
+                  {[0, 1, 2, 3, 4].map((star) => (
+                    <Star key={star} fill="currentColor" />
+                  ))}
+                </small>
+              </span>
+              <ArrowRight className="google-arrow" />
+            </a>
           </div>
         </div>
         <div className="hero-side">
@@ -729,6 +818,12 @@ export default function Home() {
       </section>
       <section className="tow" id="grua">
         <div className="tow-art">
+          <img
+            className="tow-photo"
+            src="https://res.cloudinary.com/dvvuwigmy/image/upload/f_auto,q_auto,w_1200/v1787810096/IMG_0866_dljosi.jpg"
+            alt="Servicio de grúa de Power Master Chile"
+            loading="lazy"
+          />
           <div className="tow-road" />
           <Truck />
           <span className="tow-badge">
@@ -800,20 +895,12 @@ export default function Home() {
       </section>
       <section className="trust" id="confianza">
         <div className="trust-visual">
-          <div className="rings">
-            <span>
-              POWER
-              <br />
-              <b>MASTER</b>
-            </span>
-          </div>
-          <div className="floating-tag">
-            <Activity />
-            <span>
-              <b>Diagnóstico real</b>
-              <small>Antes de reemplazar</small>
-            </span>
-          </div>
+          <img
+            className="trust-image"
+            src="https://res.cloudinary.com/dvvuwigmy/image/upload/f_auto,q_auto,w_1200/v1787809905/Captura_hnf5a4.png"
+            alt="Trabajo técnico en Power Master Chile"
+            loading="lazy"
+          />
         </div>
         <div className="trust-copy">
           <span className="kicker">NUESTRO ESTÁNDAR</span>
@@ -887,6 +974,12 @@ export default function Home() {
           </button>
         </div>
         <aside>
+          <img
+            className="prepurchase-image"
+            src="https://res.cloudinary.com/dvvuwigmy/image/upload/f_auto,q_auto,w_1000/v1787810181/IMG_0867_j6a7lx.jpg"
+            alt="Revisión precompra 360 grados en Power Master Chile"
+            loading="lazy"
+          />
           <span>REVISIÓN</span>
           <strong>360°</strong>
           <p>
@@ -917,6 +1010,45 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <section className="contact-section" aria-labelledby="contact-title">
+        <div className="contact-copy">
+          <span className="kicker">CONTACTO Y UBICACIÓN</span>
+          <h2 id="contact-title">
+            Estamos en Temuco.
+            <br />
+            <em>Ven a conocernos.</em>
+          </h2>
+          <p>
+            Visítanos en General Pedro Lagos #173. También puedes escribirnos,
+            llamarnos o iniciar una consulta con nuestro asistente virtual.
+          </p>
+          <div className="contact-links">
+            <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noreferrer">
+              <MessageCircle />
+              <span><small>WHATSAPP</small><b>+56 9 7799 7536</b></span>
+            </a>
+            <a href={`mailto:${EMAIL}`}>
+              <Mail />
+              <span><small>CORREO</small><b>{EMAIL}</b></span>
+            </a>
+            <a href={MAPS_URL} target="_blank" rel="noreferrer">
+              <MapPin />
+              <span><small>DIRECCIÓN</small><b>General Pedro Lagos #173</b></span>
+            </a>
+          </div>
+        </div>
+        <div className="contact-map">
+          <iframe
+            src="https://www.google.com/maps?q=General%20Pedro%20Lagos%20173%2C%20Temuco%2C%20Chile&output=embed"
+            title="Ubicación de Power Master Chile en Google Maps"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+          <a href={MAPS_URL} target="_blank" rel="noreferrer">
+            Abrir en Google Maps <ArrowRight />
+          </a>
+        </div>
+      </section>
       <footer>
         <div className="footer-main">
           <div className="footer-brand">
@@ -929,7 +1061,7 @@ export default function Home() {
           <div>
             <span>VISÍTANOS</span>
             <a
-              href="https://maps.google.com/?q=General+Pedro+Lagos+173+Temuco"
+              href={MAPS_URL}
               target="_blank"
             >
               General Pedro Lagos #173
