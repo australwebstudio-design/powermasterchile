@@ -657,7 +657,7 @@ export default function Home() {
 
     const elements = Array.from(
       document.querySelectorAll<HTMLElement>(
-        ".section-head, .service-grid article, .services-note, .tow-art, .tow-copy, .trust-visual, .trust-copy, .prepurchase > div, .prepurchase aside, .cta > div:last-child, .contact-copy, .contact-map, .footer-main > *",
+        ".about-manifesto, .about-content, .section-head, .service-grid article, .services-note, .tow-art, .tow-copy, .trust-visual, .trust-copy, .prepurchase > div, .prepurchase aside, .cta > div:last-child, .contact-copy, .contact-map, .footer-main > *",
       ),
     );
     document.documentElement.classList.add("reveal-enabled");
@@ -713,6 +713,7 @@ export default function Home() {
           </span>
         </a>
         <nav className={menu ? "open" : ""}>
+          <a href="#nosotros">Nosotros</a>
           <a href="#servicios">Servicios</a>
           <a href="#grua">Grúa</a>
           <a href="#confianza">Por qué elegirnos</a>
@@ -827,6 +828,66 @@ export default function Home() {
         <button onClick={() => open("Evaluación del vehículo")}>
           Evaluar mi vehículo <ArrowRight />
         </button>
+      </section>
+      <section className="about" id="nosotros" aria-labelledby="about-title">
+        <div className="about-manifesto">
+          <span className="kicker">QUIÉNES SOMOS</span>
+          <h2 id="about-title">
+            La confianza se construye
+            <br />
+            <em>haciendo bien cada trabajo.</em>
+          </h2>
+          <p>
+            En Power Master Chile entendemos que detrás de cada vehículo hay
+            una persona que necesita seguridad, claridad y una solución real.
+            Por eso trabajamos con criterio técnico, comunicación directa y el
+            compromiso de cuidar cada detalle.
+          </p>
+          <div className="about-signature">
+            <img src="/power-master-logo.png" alt="" />
+            <span>
+              <b>POWER MASTER CHILE</b>
+              <small>DONDE QUIERAS LLEGAR</small>
+            </span>
+          </div>
+        </div>
+        <div className="about-content">
+          <span className="about-number">PM / TEMUCO</span>
+          <p className="about-lead">
+            Somos un servicio técnico automotriz orientado a resolver desde la
+            causa, no a cambiar piezas por prueba y error.
+          </p>
+          <div className="about-pillars">
+            {[
+              [
+                "01",
+                "Diagnóstico antes de intervenir",
+                "Escuchamos los síntomas, revisamos el vehículo y definimos el camino correcto antes de reparar.",
+              ],
+              [
+                "02",
+                "Información clara",
+                "Te explicamos qué encontramos para que puedas decidir con seguridad y sin tecnicismos innecesarios.",
+              ],
+              [
+                "03",
+                "Un servicio que acompaña",
+                "Desde la primera consulta hasta la revisión final, mantenemos una atención cercana y profesional.",
+              ],
+            ].map(([number, title, description]) => (
+              <article key={number}>
+                <b>{number}</b>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <button onClick={() => open("Quiero hablar con Power Master")}>
+            Hablar con nuestro equipo <ArrowRight />
+          </button>
+        </div>
       </section>
       <section className="section" id="servicios">
         <div className="section-head">

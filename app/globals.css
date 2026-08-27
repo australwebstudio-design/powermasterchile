@@ -335,6 +335,127 @@ h2 em {
   gap: 24px;
   align-items: center;
 }
+.about {
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  min-height: 760px;
+  background: #08090a;
+  color: #fff;
+}
+.about-manifesto {
+  position: relative;
+  overflow: hidden;
+  padding: 120px clamp(28px, 7vw, 105px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #0b0c0d;
+  isolation: isolate;
+}
+.about-manifesto::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5,6,7,.93) 0%, rgba(5,6,7,.74) 58%, rgba(5,6,7,.56) 100%),
+    linear-gradient(145deg, rgba(237,25,25,.25), transparent 52%),
+    url("https://res.cloudinary.com/dvvuwigmy/image/upload/f_auto,q_auto,w_1400/v1787809905/Captura_hnf5a4.png") center / cover no-repeat;
+  filter: saturate(.82) contrast(1.08);
+  transform: scale(1.015);
+}
+.about-manifesto::after {
+  content: "PM";
+  position: absolute;
+  right: -30px;
+  bottom: -75px;
+  color: rgba(255,255,255,.025);
+  font-size: clamp(180px, 27vw, 420px);
+  font-weight: 900;
+  letter-spacing: -.12em;
+  pointer-events: none;
+  z-index: 0;
+}
+.about-manifesto > .kicker { position: relative; z-index: 1; }
+.about h2 {
+  position: relative;
+  z-index: 1;
+  max-width: 820px;
+  margin: 24px 0 28px;
+  font-size: clamp(44px, 5vw, 76px);
+  line-height: .98;
+  letter-spacing: -.055em;
+}
+.about h2 em {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,.8);
+}
+.about-manifesto > p {
+  position: relative;
+  z-index: 1;
+  max-width: 650px;
+  color: #aaadaf;
+  font-size: 15px;
+  line-height: 1.85;
+}
+.about-signature {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 45px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+.about-signature img {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+.about-signature span {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.about-signature b { font-size: 12px; letter-spacing: .12em; }
+.about-signature small { color: #747779; font-size: 8px; letter-spacing: .22em; }
+.about-content {
+  padding: 120px clamp(28px, 6vw, 90px);
+  background: #f1f1ef;
+  color: #111315;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.about-number {
+  color: var(--red);
+  font-size: 9px;
+  letter-spacing: .28em;
+  font-weight: 800;
+}
+.about-lead {
+  margin: 25px 0 44px;
+  max-width: 620px;
+  font-size: clamp(24px, 2.5vw, 36px);
+  line-height: 1.25;
+  letter-spacing: -.035em;
+}
+.about-pillars article {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 16px;
+  padding: 22px 0;
+  border-top: 1px solid #cfd0cc;
+}
+.about-pillars article > b { color: var(--red); font-size: 10px; padding-top: 4px; }
+.about-pillars h3 { margin: 0 0 7px; font-size: 16px; }
+.about-pillars p { margin: 0; color: #686b6d; font-size: 12px; line-height: 1.65; }
+.about-content > button {
+  align-self: flex-start;
+  margin-top: 30px;
+}
 .section {
   padding: 120px clamp(24px, 8vw, 128px);
 }
@@ -1604,6 +1725,23 @@ footer {
   color: #818385;
 }
 @media (max-width: 900px) {
+  .about {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .about-manifesto,
+  .about-content {
+    padding: 78px 22px;
+  }
+  .about h2 {
+    font-size: 45px;
+  }
+  .about-manifesto > p {
+    font-size: 13px;
+  }
+  .about-lead {
+    font-size: 27px;
+  }
   .assistant-shell {
     inset: 0;
     width: 100%;
